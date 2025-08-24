@@ -4,9 +4,23 @@ import { stripe } from "../lib/stripe.js";
 
 export const createCheckoutSession = async (req, res) => {
 	try {
+		console.log("Creating checkout session...");
+		
+		// Check if Stripe is properly configured
+		if (!process.env.STRIPE_SECRET_KEY) {
+			console.error("STRIPE_SECRET_KEY is not set in environment variables");
+			return res.status(500).json({ 
+				message: "Payment gateway configuration error", 
+				error: "Stripe secret key is not configured" 
+			});
+		}
+
 		const { products, couponCode } = req.body;
+		console.log("Products:", products);
+		console.log("Coupon code:", couponCode);
 
 		if (!Array.isArray(products) || products.length === 0) {
+			console.error("Invalid or empty products array");
 			return res.status(400).json({ error: "Invalid or empty products array" });
 		}
 
@@ -29,14 +43,29 @@ export const createCheckoutSession = async (req, res) => {
 			};
 		});
 
+		console.log("Line items:", lineItems);
+		console.log("Total amount (cents):", totalAmount);
+
 		let coupon = null;
 		if (couponCode) {
 			coupon = await Coupon.findOne({ code: couponCode, userId: req.user._id, isActive: true });
 			if (coupon) {
+				console.log("Applying coupon:", couponCode, "with discount:", coupon.discountPercentage + "%");
 				totalAmount -= Math.round((totalAmount * coupon.discountPercentage) / 100);
+				console.log("Total amount after coupon:", totalAmount);
 			}
 		}
 
+		// Check if CLIENT_URL is set
+		if (!process.env.CLIENT_URL) {
+			console.error("CLIENT_URL is not set in environment variables");
+			return res.status(500).json({ 
+				message: "Configuration error", 
+				error: "Client URL is not configured" 
+			});
+		}
+
+		console.log("Creating Stripe session...");
 		const session = await stripe.checkout.sessions.create({
 			payment_method_types: ["card"],
 			line_items: lineItems,
@@ -63,13 +92,24 @@ export const createCheckoutSession = async (req, res) => {
 			},
 		});
 
+		console.log("Stripe session created successfully:", session.id);
+
 		if (totalAmount >= 20000) {
+			console.log("Creating new coupon for user:", req.user._id);
 			await createNewCoupon(req.user._id);
 		}
+		
 		res.status(200).json({ id: session.id, totalAmount: totalAmount / 100 });
 	} catch (error) {
 		console.error("Error processing checkout:", error);
-		res.status(500).json({ message: "Error processing checkout", error: error.message });
+		console.error("Error details:", error.type, error.code, error.param);
+		res.status(500).json({ 
+			message: "Error processing checkout", 
+			error: error.message,
+			type: error.type,
+			code: error.code,
+			param: error.param
+		});
 	}
 };
 
