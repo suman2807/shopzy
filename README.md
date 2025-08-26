@@ -1,6 +1,27 @@
 # 🛒 Shopzy - E-Commerce Platform
 
-A modern full-stack e-commerce application built with the MERN stack.
+
+Shopzy is a modern, full-stack e-commerce platform built with the MERN stack. It offers a seamless shopping experience for users and powerful management tools for admins. The project is designed for scalability, performance, and ease of use.
+
+---
+
+## 📁 Project Structure
+
+```
+shopzy/
+├── backend/         # Express.js server, API, database, business logic
+│   ├── controllers/ # Route controllers
+│   ├── lib/         # Utility libraries (db, cloudinary, redis, stripe)
+│   ├── middleware/  # Express middlewares
+│   ├── models/      # Mongoose models
+│   └── routes/      # API route definitions
+├── frontend/        # React app (Vite, Tailwind CSS, Zustand)
+│   ├── public/      # Static assets
+│   ├── src/         # React components, pages, stores, libs
+│   └── ...          # Frontend configs
+├── package.json     # Project metadata
+└── README.md        # Project documentation
+```
 
 ## ✨ Features
 
@@ -21,10 +42,17 @@ A modern full-stack e-commerce application built with the MERN stack.
 
 1. **Clone & Install**
    ```bash
+   # Clone the repository
    git clone <repo-url>
-   cd mern-ecommerce
+   cd shopzy
+
+   # Install backend dependencies
    npm install
-   cd frontend && npm install && cd ..
+
+   # Install frontend dependencies
+   cd frontend
+   npm install
+   cd ..
    ```
 
 2. **Environment Setup**
@@ -49,12 +77,30 @@ A modern full-stack e-commerce application built with the MERN stack.
    ```
 
 3. **Run Application**
+
+   ### Development
+   Open two terminals:
+   1. In the root folder, start the backend:
+      ```bash
+      npm run dev
+      ```
+   2. In another terminal, start the frontend:
+      ```bash
+      cd frontend
+      npm run dev
+      ```
+
+   ### Production
    ```bash
-   # Development
-   npm run dev
-   
-   # Production
    npm run build
    npm run start
    ```
+
+---
+
+## 📦 Usage
+
+- Visit `http://localhost:5173` for the frontend.
+- Access backend API at `http://localhost:5000` (default).
+- Admin dashboard is available after logging in as an admin user.
 
